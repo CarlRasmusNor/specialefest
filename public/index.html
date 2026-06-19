@@ -278,6 +278,84 @@
 
     .dt-row .dt-name { color: #888; }
     .dt-row .dt-count { color: #f5c518; font-weight: 700; }
+
+    /* CELEBRATION OVERLAY */
+    #celebration {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.93);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    #celebration.show { display: flex; }
+
+    #cel-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .cel-card {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .cel-cat {
+      font-size: 1.1rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: #f5c518;
+      text-shadow: 0 0 24px rgba(245,197,24,0.9);
+      animation: celPop 1.8s ease-in-out infinite;
+    }
+
+    .cel-ring {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 6px solid #f5c518;
+      overflow: hidden;
+      animation: celGlow 1.4s ease-in-out infinite alternate;
+    }
+
+    .cel-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .cel-name {
+      font-size: 4.5rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      animation: celPop 1.8s ease-in-out infinite;
+    }
+
+    .cel-score {
+      font-size: 1.6rem;
+      color: #fff;
+      font-weight: 600;
+      opacity: 0.85;
+      letter-spacing: 0.08em;
+    }
+
+    @keyframes celPop {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes celGlow {
+      from { box-shadow: 0 0 0 4px #111, 0 0 0 8px #f5c518, 0 0 50px #f5c518, 0 0 100px rgba(245,197,24,0.4); }
+      to   { box-shadow: 0 0 0 4px #111, 0 0 0 8px #f5c518, 0 0 90px #f5c518, 0 0 180px rgba(245,197,24,0.7); }
+    }
   </style>
 </head>
 <body>
@@ -289,6 +367,16 @@
   </div>
   <div id="clock"></div>
 </header>
+
+<div id="celebration">
+  <canvas id="cel-canvas"></canvas>
+  <div class="cel-card">
+    <div class="cel-cat" id="cel-cat"></div>
+    <div class="cel-ring"><img id="cel-img" src="" alt=""></div>
+    <div class="cel-name" id="cel-name"></div>
+    <div class="cel-score" id="cel-score"></div>
+  </div>
+</div>
 
 <main>
   <div class="track-area" id="track-area"></div>
@@ -407,6 +495,8 @@
       }).join('');
     }
 
+    renderCelebration(state.celebration || null);
+
     // Totals
     const totals = document.getElementById('drink-totals');
     const byDrinks = [...state.participants].sort((a, b) => b.drinks - a.drinks);
@@ -426,6 +516,77 @@
     } catch (e) { /* silent */ }
   }
 
+  // ── Confetti ──────────────────────────────────────────────
+  const CONFETTI_COLORS = ['#f5c518','#ffffff','#e74c3c','#3498db','#2ecc71','#c678dd','#f39c12','#e91e63'];
+  let confettiParts = [], celRaf = null;
+
+  function startConfetti() {
+    const cv = document.getElementById('cel-canvas');
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    const ctx = cv.getContext('2d');
+    confettiParts = Array.from({ length: 180 }, () => ({
+      x: Math.random() * cv.width,
+      y: Math.random() * -cv.height,
+      vx: (Math.random() - 0.5) * 3,
+      vy: Math.random() * 3 + 1.5,
+      rot: Math.random() * 360,
+      rv: (Math.random() - 0.5) * 7,
+      w: Math.random() * 10 + 6,
+      h: Math.random() * 6 + 3,
+      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    }));
+    (function loop() {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      confettiParts.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.rv;
+        if (p.y > cv.height) { p.y = -20; p.x = Math.random() * cv.width; }
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      celRaf = requestAnimationFrame(loop);
+    })();
+  }
+
+  function stopConfetti() {
+    if (celRaf) { cancelAnimationFrame(celRaf); celRaf = null; }
+    const cv = document.getElementById('cel-canvas');
+    cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
+  }
+
+  const CEL_LABELS = { points: '🏆 POINT-VINDER', drinks: '🍺 DRUK-MESTER', wins: '⭐ CHALLENGE-MESTER' };
+  const CEL_SUFFIX = { points: ' point', drinks: ' genstande', wins: ' sejre' };
+  let lastCelKey = null;
+
+  function renderCelebration(cel) {
+    const el = document.getElementById('celebration');
+    if (!cel) {
+      el.classList.remove('show');
+      stopConfetti();
+      lastCelKey = null;
+      return;
+    }
+    const key = cel.category + cel.winner;
+    if (key === lastCelKey) return;
+    lastCelKey = key;
+
+    const hex = COLORS[cel.winner]?.hex || '#f5c518';
+    document.getElementById('cel-cat').textContent = CEL_LABELS[cel.category] || '';
+    document.getElementById('cel-img').src = `/photos/${cel.winner.toLowerCase()}.jpg`;
+    document.getElementById('cel-name').textContent = cel.winner;
+    document.getElementById('cel-name').style.color = hex;
+    document.getElementById('cel-name').style.textShadow = `0 0 40px ${hex}, 0 0 80px ${hex}66`;
+    document.getElementById('cel-score').textContent = cel.score + (CEL_SUFFIX[cel.category] || '');
+    el.classList.add('show');
+    stopConfetti();
+    startConfetti();
+  }
+
+  // ── Boot ──────────────────────────────────────────────────
   buildLanes();
   poll();
   setInterval(poll, 3000);

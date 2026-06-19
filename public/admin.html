@@ -116,8 +116,63 @@
     .win-btn.rem:hover, .win-btn.rem:active { background: #555; color: #fff; border-color: #555; }
     .win-btn:active { transform: scale(0.93); }
 
-    .reset-section {
+    .celebrate-section {
       margin-top: 32px;
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .celebrate-section h2 {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #f5c518;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .celebrate-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .cel-btn {
+      padding: 14px 8px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+      transition: all 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .cel-btn:hover, .cel-btn:active { background: #f5c518; color: #000; border-color: #f5c518; transform: scale(0.96); }
+
+    .hide-cel-btn {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #333;
+      color: #555;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .hide-cel-btn:hover { border-color: #666; color: #aaa; }
+
+    .reset-section {
+      margin-top: 16px;
       text-align: center;
     }
 
@@ -158,6 +213,16 @@
 
 <h1>⚙️ Admin</h1>
 <div id="cards"></div>
+
+<div class="celebrate-section">
+  <h2>🎉 Vis Vinder</h2>
+  <div class="celebrate-btns">
+    <button class="cel-btn" onclick="celebrate('points')">🏆<br>Flest<br>Point</button>
+    <button class="cel-btn" onclick="celebrate('drinks')">🍺<br>Flest<br>Genstande</button>
+    <button class="cel-btn" onclick="celebrate('wins')">⭐<br>Flest<br>Sejre</button>
+  </div>
+  <button class="hide-cel-btn" onclick="celebrate(null)">✕ Skjul fejring</button>
+</div>
 
 <div class="reset-section">
   <button class="reset-btn" onclick="resetAll()">🔄 Reset alt til 0</button>
@@ -225,6 +290,15 @@
     });
     await poll();
     toast(`${name}: ${points > 0 ? '+' : ''}${points} pt`);
+  }
+
+  async function celebrate(category) {
+    await fetch('/api/celebrate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category })
+    });
+    toast(category ? '🎉 Vinder på skærmen!' : 'Fejring skjult');
   }
 
   async function resetAll() {

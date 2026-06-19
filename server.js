@@ -20,7 +20,8 @@ function loadState() {
 function initState() {
   const state = {
     participants: PARTICIPANTS.map(name => ({ name, points: 0, drinks: 0, wins: 0 })),
-    log: []
+    log: [],
+    celebration: null
   };
   saveState(state);
   return state;
@@ -65,6 +66,19 @@ app.post('/api/wins', (req, res) => {
   p.wins = Math.min(6, Math.max(0, (p.wins || 0) + Number(delta)));
   saveState(state);
   res.json({ success: true, participant: p });
+});
+
+app.post('/api/celebrate', (req, res) => {
+  const { category } = req.body;
+  const state = loadState();
+  if (!category) {
+    state.celebration = null;
+  } else {
+    const sorted = [...state.participants].sort((a, b) => (b[category] || 0) - (a[category] || 0));
+    state.celebration = { category, winner: sorted[0].name, score: sorted[0][category] || 0 };
+  }
+  saveState(state);
+  res.json({ success: true, celebration: state.celebration });
 });
 
 app.post('/api/reset', (req, res) => {
