@@ -207,7 +207,7 @@
 
     /* DRINK LOG */
     .drink-log {
-      width: 170px;
+      width: 210px;
       flex-shrink: 0;
       background: #0d0d0d;
       border-left: 1px solid #1e1e1e;
@@ -218,7 +218,7 @@
 
     .drink-log-header {
       padding: 8px 12px;
-      font-size: 0.68rem;
+      font-size: 0.8rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: #f5c518;
@@ -242,7 +242,7 @@
       border-radius: 6px;
       margin-bottom: 3px;
       background: rgba(255,255,255,0.04);
-      font-size: 0.74rem;
+      font-size: 0.88rem;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -262,8 +262,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 2px 2px;
-      font-size: 0.72rem;
+      padding: 3px 2px;
+      font-size: 0.85rem;
     }
 
     .dt-row .dt-name { color: #888; }
@@ -361,9 +361,17 @@
       const pct = 2 + (p.points / maxPts) * 83;
       document.getElementById('car-' + p.name).style.left = pct + '%';
 
+      const podiumColors = ['#f5c518', '#c0c0c0', '#cd7f32'];
+      const trailColor = rank < 3 ? podiumColors[rank] : COLORS[p.name].hex;
       const trail = document.getElementById('trail-' + p.name);
       trail.style.width = p.points > 0 ? pct + '%' : '0%';
-      trail.classList.toggle('leader', rank === 0 && p.points > 0);
+      trail.style.background = `linear-gradient(90deg, transparent 0%, ${trailColor} 100%)`;
+      trail.style.opacity = rank < 3 && p.points > 0 ? '1' : '0.4';
+      trail.style.height = rank === 0 ? '4px' : '3px';
+      trail.style.boxShadow = rank === 0 ? '0 0 10px #f5c518, 0 0 22px rgba(245,197,24,0.35)'
+                             : rank === 1 ? '0 0 8px rgba(192,192,192,0.4)'
+                             : rank === 2 ? '0 0 8px rgba(205,127,50,0.4)'
+                             : 'none';
     });
 
     // Log

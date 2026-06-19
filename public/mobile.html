@@ -238,7 +238,10 @@
     document.getElementById('who-name').textContent = name;
     document.getElementById('who-name').style.color = COLORS[name] || '#f5c518';
     document.getElementById('drink-section').classList.add('show');
-    if (state) updateMine();
+    if (state) {
+      updateMine();
+      renderBoard();
+    }
   }
 
   function updateMine() {
