@@ -293,12 +293,21 @@
   }
 
   async function celebrate(category) {
-    await fetch('/api/celebrate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category })
-    });
-    toast(category ? '🎉 Vinder på skærmen!' : 'Fejring skjult');
+    try {
+      const res = await fetch('/api/celebrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast(category ? `🎉 ${data.celebration.winner} på skærmen!` : 'Fejring skjult');
+      } else {
+        toast('❌ Fejl fra server');
+      }
+    } catch (e) {
+      toast('❌ Forbindelsesfejl');
+    }
   }
 
   async function resetAll() {

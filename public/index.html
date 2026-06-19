@@ -553,7 +553,9 @@
   }
 
   function stopConfetti() {
-    if (celRaf) { cancelAnimationFrame(celRaf); celRaf = null; }
+    if (!celRaf) return;
+    cancelAnimationFrame(celRaf);
+    celRaf = null;
     const cv = document.getElementById('cel-canvas');
     cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
   }
