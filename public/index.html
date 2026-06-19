@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <title>Specialefest 🏁</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080808;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0d0d1a 0%, #141428 100%);
+      border-bottom: 2px solid #f5c518;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 0.25em;
+      color: #f5c518;
+      text-transform: uppercase;
+      text-shadow: 0 0 24px rgba(245,197,24,0.6);
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: #666;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    #clock {
+      font-size: 2rem;
+      font-weight: 300;
+      color: #f5c518;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.05em;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* TRACK AREA */
+    .track-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 6px 0;
+      position: relative;
+    }
+
+    .lane {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      position: relative;
+    }
+
+    .rank-col {
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      background: #0a0a0a;
+      border-right: 1px solid #1a1a1a;
+    }
+
+    .track {
+      flex: 1;
+      position: relative;
+      background:
+        repeating-linear-gradient(90deg, transparent 0, transparent 58px, rgba(255,255,255,0.025) 58px, rgba(255,255,255,0.025) 60px),
+        linear-gradient(180deg, #161616 0%, #111 100%);
+      overflow: hidden;
+    }
+
+    /* center dashed line */
+    .track::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 20px;
+      top: 50%;
+      border-top: 2px dashed rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+
+    /* finish line */
+    .track::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 20px;
+      background: repeating-conic-gradient(#e0e0e0 0% 25%, #111 0% 50%) 0 0 / 10px 10px;
+      z-index: 5;
+    }
+
+    .car {
+      position: absolute;
+      left: 2%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: left 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 10;
+      cursor: default;
+    }
+
+    .car-points {
+      background: rgba(0,0,0,0.75);
+      color: #f5c518;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+
+    .car-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid currentColor;
+      overflow: hidden;
+      background: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1rem;
+      box-shadow: 0 0 14px currentColor;
+      position: relative;
+    }
+
+    .car-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .car-avatar .initials {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 900;
+    }
+
+    .car-name {
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 3px;
+      white-space: nowrap;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+    }
+
+    /* DRINK LOG */
+    .drink-log {
+      width: 170px;
+      flex-shrink: 0;
+      background: #0d0d0d;
+      border-left: 1px solid #1e1e1e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .drink-log-header {
+      padding: 8px 12px;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f5c518;
+      border-bottom: 1px solid #1e1e1e;
+      background: #0a0a0a;
+      flex-shrink: 0;
+    }
+
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px;
+    }
+
+    .log-list::-webkit-scrollbar { width: 4px; }
+    .log-list::-webkit-scrollbar-track { background: #0d0d0d; }
+    .log-list::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .log-item {
+      padding: 5px 8px;
+      border-radius: 6px;
+      margin-bottom: 3px;
+      background: rgba(255,255,255,0.04);
+      font-size: 0.74rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .log-item .log-name { font-weight: 700; flex: 1; }
+    .log-item .log-time { color: #444; font-size: 0.65rem; }
+
+    .drink-totals {
+      padding: 8px;
+      border-top: 1px solid #1e1e1e;
+      background: #0a0a0a;
+      flex-shrink: 0;
+    }
+
+    .dt-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 2px;
+      font-size: 0.72rem;
+    }
+
+    .dt-row .dt-name { color: #888; }
+    .dt-row .dt-count { color: #f5c518; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title">🏁 Specialefest</div>
+    <div class="subtitle">Point-tavle</div>
+  </div>
+  <div id="clock"></div>
+</header>
+
+<main>
+  <div class="track-area" id="track-area"></div>
+
+  <div class="drink-log">
+    <div class="drink-log-header">🍺 Druk-log</div>
+    <div class="log-list" id="log-list">
+      <div style="color:#333; text-align:center; padding:20px; font-size:0.8rem;">Ingen endnu</div>
+    </div>
+    <div class="drink-totals" id="drink-totals"></div>
+  </div>
+</main>
+
+<script>
+  const COLORS = {
+    Victor:  { hex: '#e74c3c' },
+    Sune:    { hex: '#3498db' },
+    Reber:   { hex: '#2ecc71' },
+    Asger:   { hex: '#e67e22' },
+    Emilie:  { hex: '#c678dd' },
+    Carl:    { hex: '#1abc9c' },
+    Johan:   { hex: '#f39c12' },
+    Mads:    { hex: '#e91e63' },
+  };
+
+  const RANK_LABELS = ['🥇', '🥈', '🥉'];
+
+  function initials(name) { return name.slice(0, 2).toUpperCase(); }
+
+  function formatTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Clock
+  function tick() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  // Build lane DOM once
+  function buildLanes() {
+    const area = document.getElementById('track-area');
+    Object.entries(COLORS).forEach(([name, c]) => {
+      const lane = document.createElement('div');
+      lane.className = 'lane';
+      lane.id = 'lane-' + name;
+      lane.innerHTML = `
+        <div class="rank-col" id="rank-${name}">1</div>
+        <div class="track">
+          <div class="car" id="car-${name}" style="color: ${c.hex}">
+            <div class="car-points" id="pts-${name}">0 pt</div>
+            <div class="car-avatar" style="border-color:${c.hex}; box-shadow:0 0 14px ${c.hex}88">
+              <img src="/photos/${name.toLowerCase()}.jpg"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+              <span class="initials" style="color:${c.hex}">${initials(name)}</span>
+            </div>
+            <div class="car-name" style="color:${c.hex}">${name}</div>
+          </div>
+        </div>
+      `;
+      area.appendChild(lane);
+    });
+  }
+
+  function render(state) {
+    const sorted = [...state.participants].sort((a, b) => b.points - a.points);
+    const maxPts = Math.max(...sorted.map(p => p.points), 10);
+
+    sorted.forEach((p, rank) => {
+      const lane = document.getElementById('lane-' + p.name);
+      lane.style.order = rank;
+
+      document.getElementById('rank-' + p.name).textContent = RANK_LABELS[rank] || (rank + 1);
+      document.getElementById('pts-' + p.name).textContent = p.points + ' pt';
+
+      const pct = 2 + (p.points / maxPts) * 83;
+      document.getElementById('car-' + p.name).style.left = pct + '%';
+    });
+
+    // Log
+    const drinkLogs = state.log.filter(l => l.type === 'drink').slice(0, 25);
+    const logList = document.getElementById('log-list');
+    if (drinkLogs.length === 0) {
+      logList.innerHTML = '<div style="color:#333; text-align:center; padding:20px; font-size:0.8rem;">Ingen endnu</div>';
+    } else {
+      logList.innerHTML = drinkLogs.map(l => {
+        const c = COLORS[l.name]?.hex || '#fff';
+        return `<div class="log-item">
+          <span>🍺</span>
+          <span class="log-name" style="color:${c}">${l.name}</span>
+          <span class="log-time">${formatTime(l.time)}</span>
+        </div>`;
+      }).join('');
+    }
+
+    // Totals
+    const totals = document.getElementById('drink-totals');
+    const byDrinks = [...state.participants].sort((a, b) => b.drinks - a.drinks);
+    totals.innerHTML = byDrinks.map(p => `
+      <div class="dt-row">
+        <span class="dt-name">${p.name}</span>
+        <span class="dt-count">${p.drinks} 🍺</span>
+      </div>
+    `).join('');
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch('/api/state');
+      const state = await res.json();
+      render(state);
+    } catch (e) { /* silent */ }
+  }
+
+  buildLanes();
+  poll();
+  setInterval(poll, 3000);
+</script>
+</body>
+</html>

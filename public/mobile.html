@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Specialefest 🍺</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080808;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      padding: 20px 16px 40px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #f5c518;
+      font-size: 1.4rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      text-shadow: 0 0 20px rgba(245,197,24,0.5);
+    }
+
+    .tagline {
+      text-align: center;
+      color: #444;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    /* Name grid */
+    #name-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .name-btn {
+      padding: 18px 8px;
+      border: 2px solid #252525;
+      background: #111;
+      color: #aaa;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .name-btn.active {
+      border-color: var(--c);
+      background: color-mix(in srgb, var(--c) 15%, transparent);
+      color: var(--c);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--c) 35%, transparent);
+    }
+
+    /* Drink section */
+    #drink-section { display: none; }
+    #drink-section.show { display: block; }
+
+    .who {
+      text-align: center;
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
+    }
+
+    .who strong { font-weight: 800; }
+
+    .drink-btn {
+      display: block;
+      width: 100%;
+      padding: 36px 16px 28px;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f5c518 0%, #e67e22 100%);
+      color: #000;
+      font-size: 3.5rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 8px 32px rgba(245,197,24,0.3);
+      margin-bottom: 14px;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+    }
+
+    .drink-btn .btn-label {
+      display: block;
+      font-size: 0.95rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-weight: 900;
+    }
+
+    .drink-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 4px 16px rgba(245,197,24,0.2);
+    }
+
+    .drink-btn:disabled { opacity: 0.6; }
+
+    .your-count {
+      text-align: center;
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+
+    .your-count strong {
+      color: #f5c518;
+      font-size: 1.6rem;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Scoreboard */
+    .board {
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .board h3 {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #f5c518;
+      margin-bottom: 12px;
+    }
+
+    .board-row {
+      display: flex;
+      align-items: center;
+      padding: 8px 4px;
+      border-bottom: 1px solid #181818;
+      gap: 10px;
+    }
+
+    .board-row:last-child { border-bottom: none; }
+
+    .br-rank { width: 22px; font-weight: 800; font-size: 0.85rem; color: #555; }
+    .br-name { flex: 1; font-weight: 700; font-size: 0.95rem; }
+    .br-pts { color: #f5c518; font-weight: 800; font-size: 0.9rem; }
+    .br-drinks { color: #555; font-size: 0.8rem; width: 40px; text-align: right; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #2ecc71;
+      color: #000;
+      font-weight: 800;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<h1>🏁 Specialefest</h1>
+<div class="tagline">Vælg dit navn</div>
+
+<div id="name-grid"></div>
+
+<div id="drink-section">
+  <div class="who">Logget ind som <strong id="who-name"></strong></div>
+  <button class="drink-btn" id="drink-btn" onclick="logDrink()">
+    🍺
+    <span class="btn-label">Log en genstand</span>
+  </button>
+  <div class="your-count">
+    Du har drukket
+    <strong id="my-count">0</strong>
+  </div>
+  <div class="board">
+    <h3>🏆 Point-stilling</h3>
+    <div id="board-rows"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">🍺 Registreret!</div>
+
+<script>
+  const COLORS = {
+    Victor:  '#e74c3c',
+    Sune:    '#3498db',
+    Reber:   '#2ecc71',
+    Asger:   '#e67e22',
+    Emilie:  '#c678dd',
+    Carl:    '#1abc9c',
+    Johan:   '#f39c12',
+    Mads:    '#e91e63',
+  };
+
+  const RANK_LABELS = ['🥇', '🥈', '🥉'];
+
+  let me = localStorage.getItem('sf-name') || null;
+  let state = null;
+
+  function buildGrid() {
+    const grid = document.getElementById('name-grid');
+    Object.entries(COLORS).forEach(([name, hex]) => {
+      const btn = document.createElement('button');
+      btn.className = 'name-btn' + (name === me ? ' active' : '');
+      btn.textContent = name;
+      btn.style.setProperty('--c', hex);
+      btn.onclick = () => choose(name);
+      btn.id = 'nbtn-' + name;
+      grid.appendChild(btn);
+    });
+  }
+
+  function choose(name) {
+    me = name;
+    localStorage.setItem('sf-name', name);
+    document.querySelectorAll('.name-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('nbtn-' + name).classList.add('active');
+    document.getElementById('who-name').textContent = name;
+    document.getElementById('who-name').style.color = COLORS[name] || '#f5c518';
+    document.getElementById('drink-section').classList.add('show');
+    if (state) updateMine();
+  }
+
+  function updateMine() {
+    if (!me || !state) return;
+    const p = state.participants.find(p => p.name === me);
+    document.getElementById('my-count').textContent = p ? p.drinks : 0;
+  }
+
+  function renderBoard() {
+    if (!state) return;
+    const sorted = [...state.participants].sort((a, b) => b.points - a.points);
+    document.getElementById('board-rows').innerHTML = sorted.map((p, i) => `
+      <div class="board-row">
+        <div class="br-rank">${RANK_LABELS[i] || (i + 1)}</div>
+        <div class="br-name" style="color:${COLORS[p.name] || '#fff'}">${p.name}</div>
+        <div class="br-pts">${p.points} pt</div>
+        <div class="br-drinks">🍺 ${p.drinks}</div>
+      </div>
+    `).join('');
+  }
+
+  async function logDrink() {
+    if (!me) return;
+    const btn = document.getElementById('drink-btn');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/drink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: me })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast();
+        await poll();
+      }
+    } catch (e) { /* silent */ }
+    setTimeout(() => btn.disabled = false, 1200);
+  }
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  async function poll() {
+    try {
+      const res = await fetch('/api/state');
+      state = await res.json();
+      updateMine();
+      renderBoard();
+    } catch (e) { /* silent */ }
+  }
+
+  buildGrid();
+  if (me) {
+    document.getElementById('who-name').textContent = me;
+    document.getElementById('who-name').style.color = COLORS[me] || '#f5c518';
+    document.getElementById('drink-section').classList.add('show');
+  }
+  poll();
+  setInterval(poll, 5000);
+</script>
+</body>
+</html>

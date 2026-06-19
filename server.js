@@ -1,0 +1,66 @@
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+app.use(express.json());
+app.use(express.static('public'));
+
+const DATA_FILE = path.join(__dirname, 'data', 'state.json');
+const PARTICIPANTS = ['Victor', 'Sune', 'Reber', 'Asger', 'Emilie', 'Carl', 'Johan', 'Mads'];
+
+function loadState() {
+  try {
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  } catch {
+    return initState();
+  }
+}
+
+function initState() {
+  const state = {
+    participants: PARTICIPANTS.map(name => ({ name, points: 0, drinks: 0 })),
+    log: []
+  };
+  saveState(state);
+  return state;
+}
+
+function saveState(state) {
+  fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
+  fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2));
+}
+
+app.get('/api/state', (req, res) => res.json(loadState()));
+
+app.post('/api/drink', (req, res) => {
+  const { name } = req.body;
+  const state = loadState();
+  const p = state.participants.find(p => p.name === name);
+  if (!p) return res.status(404).json({ error: 'Deltager ikke fundet' });
+  p.drinks++;
+  state.log.unshift({ name, type: 'drink', time: new Date().toISOString() });
+  state.log = state.log.slice(0, 50);
+  saveState(state);
+  res.json({ success: true, participant: p });
+});
+
+app.post('/api/points', (req, res) => {
+  const { name, points } = req.body;
+  const state = loadState();
+  const p = state.participants.find(p => p.name === name);
+  if (!p) return res.status(404).json({ error: 'Deltager ikke fundet' });
+  p.points = Math.max(0, p.points + Number(points));
+  state.log.unshift({ name, type: 'points', amount: Number(points), time: new Date().toISOString() });
+  state.log = state.log.slice(0, 50);
+  saveState(state);
+  res.json({ success: true, participant: p });
+});
+
+app.post('/api/reset', (req, res) => {
+  initState();
+  res.json({ success: true });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Specialefest korer pa port ${PORT}`));

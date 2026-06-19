@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Admin – Specialefest</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #080808;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      padding: 20px 16px 60px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #f5c518;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-size: 1.3rem;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .p-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .p-pts {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #f5c518;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pt-btn {
+      padding: 8px 14px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+      -webkit-tap-highlight-color: transparent;
+      flex: 1;
+      min-width: 44px;
+      text-align: center;
+    }
+
+    .pt-btn:active { transform: scale(0.93); }
+    .pt-btn.pos:active, .pt-btn.pos:hover { background: #f5c518; color: #000; border-color: #f5c518; }
+    .pt-btn.neg:active, .pt-btn.neg:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+    .pt-btn.neg { border-color: #3a1515; color: #e74c3c; }
+
+    .reset-section {
+      margin-top: 32px;
+      text-align: center;
+    }
+
+    .reset-btn {
+      padding: 14px 32px;
+      background: transparent;
+      border: 2px solid #e74c3c;
+      color: #e74c3c;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: all 0.15s;
+    }
+
+    .reset-btn:hover { background: #e74c3c; color: #fff; }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #2ecc71;
+      color: #000;
+      font-weight: 800;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      transition: transform 0.3s;
+      z-index: 100;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<h1>⚙️ Admin</h1>
+<div id="cards"></div>
+
+<div class="reset-section">
+  <button class="reset-btn" onclick="resetAll()">🔄 Reset alt til 0</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const COLORS = {
+    Victor:  '#e74c3c',
+    Sune:    '#3498db',
+    Reber:   '#2ecc71',
+    Asger:   '#e67e22',
+    Emilie:  '#c678dd',
+    Carl:    '#1abc9c',
+    Johan:   '#f39c12',
+    Mads:    '#e91e63',
+  };
+
+  let state = null;
+
+  function render() {
+    const container = document.getElementById('cards');
+    if (!state) return;
+    container.innerHTML = state.participants.map(p => `
+      <div class="card">
+        <div class="card-top">
+          <div class="p-name" style="color:${COLORS[p.name] || '#fff'}">${p.name}</div>
+          <div class="p-pts" id="pts-${p.name}">${p.points} pt</div>
+        </div>
+        <div class="btn-row">
+          <button class="pt-btn neg" onclick="give('${p.name}', -1)">−1</button>
+          <button class="pt-btn pos" onclick="give('${p.name}', 1)">+1</button>
+          <button class="pt-btn pos" onclick="give('${p.name}', 2)">+2</button>
+          <button class="pt-btn pos" onclick="give('${p.name}', 3)">+3</button>
+          <button class="pt-btn pos" onclick="give('${p.name}', 5)">+5</button>
+          <button class="pt-btn pos" onclick="give('${p.name}', 10)">+10</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function give(name, points) {
+    await fetch('/api/points', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, points })
+    });
+    await poll();
+    toast(`${name}: ${points > 0 ? '+' : ''}${points} pt`);
+  }
+
+  async function resetAll() {
+    if (!confirm('Reset alle point og drinks? Kan ikke fortrydes.')) return;
+    await fetch('/api/reset', { method: 'POST' });
+    await poll();
+    toast('Alt nulstillet');
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  async function poll() {
+    const res = await fetch('/api/state');
+    state = await res.json();
+    render();
+  }
+
+  poll();
+  setInterval(poll, 4000);
+</script>
+</body>
+</html>
