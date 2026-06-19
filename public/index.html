@@ -249,7 +249,7 @@
     }
 
     .log-item .log-name { font-weight: 700; flex: 1; }
-    .log-item .log-time { color: #444; font-size: 0.65rem; }
+    .log-item .log-time { color: #ccc; font-size: 0.65rem; }
 
     .drink-totals {
       padding: 8px;
@@ -380,11 +380,14 @@
     if (drinkLogs.length === 0) {
       logList.innerHTML = '<div style="color:#333; text-align:center; padding:20px; font-size:0.8rem;">Ingen endnu</div>';
     } else {
+      const DRINK_EMOJI = { øl: '🍺', vin: '🍷', drik: '🥤' };
       logList.innerHTML = drinkLogs.map(l => {
         const c = COLORS[l.name]?.hex || '#fff';
+        const emoji = DRINK_EMOJI[l.drinkType] || '🍺';
+        const units = l.units > 1 ? ` ×${l.units}` : '';
         return `<div class="log-item">
-          <span>🍺</span>
-          <span class="log-name" style="color:${c}">${l.name}</span>
+          <span>${emoji}</span>
+          <span class="log-name" style="color:${c}">${l.name}${units}</span>
           <span class="log-time">${formatTime(l.time)}</span>
         </div>`;
       }).join('');

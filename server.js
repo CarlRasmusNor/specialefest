@@ -34,12 +34,12 @@ function saveState(state) {
 app.get('/api/state', (req, res) => res.json(loadState()));
 
 app.post('/api/drink', (req, res) => {
-  const { name } = req.body;
+  const { name, drinkType = 'drik', units = 1 } = req.body;
   const state = loadState();
   const p = state.participants.find(p => p.name === name);
   if (!p) return res.status(404).json({ error: 'Deltager ikke fundet' });
-  p.drinks++;
-  state.log.unshift({ name, type: 'drink', time: new Date().toISOString() });
+  p.drinks += Number(units);
+  state.log.unshift({ name, type: 'drink', drinkType, units: Number(units), time: new Date().toISOString() });
   state.log = state.log.slice(0, 50);
   saveState(state);
   res.json({ success: true, participant: p });
