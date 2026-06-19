@@ -183,6 +183,16 @@
       text-shadow: 0 1px 4px rgba(0,0,0,0.9);
     }
 
+    .car-stars {
+      font-size: 0.65rem;
+      color: #f5c518;
+      letter-spacing: 1px;
+      text-shadow: 0 0 6px rgba(245,197,24,0.9);
+      margin-top: 2px;
+      min-height: 10px;
+      white-space: nowrap;
+    }
+
     .trail {
       position: absolute;
       left: 0;
@@ -308,16 +318,6 @@
 
   function initials(name) { return name.slice(0, 2).toUpperCase(); }
 
-  function winsBoxShadow(wins, glowHex) {
-    const base = `0 0 14px ${glowHex}88`;
-    if (!wins) return base;
-    const rings = [];
-    for (let i = 0; i < wins; i++) {
-      if (i > 0) rings.push(`0 0 0 ${i * 6}px #111`);
-      rings.push(`0 0 0 ${i * 6 + 3}px #f5c518`);
-    }
-    return base + ', ' + rings.join(', ');
-  }
 
   function formatTime(iso) {
     const d = new Date(iso);
@@ -351,6 +351,7 @@
               <span class="initials" style="color:${c.hex}">${initials(name)}</span>
             </div>
             <div class="car-name" style="color:${c.hex}">${name}</div>
+            <div class="car-stars" id="stars-${name}"></div>
           </div>
         </div>
       `;
@@ -372,8 +373,7 @@
       const pct = 2 + (p.points / maxPts) * 83;
       document.getElementById('car-' + p.name).style.left = pct + '%';
 
-      const avatar = document.querySelector('#car-' + p.name + ' .car-avatar');
-      avatar.style.boxShadow = winsBoxShadow(p.wins || 0, COLORS[p.name].hex);
+      document.getElementById('stars-' + p.name).textContent = '★'.repeat(p.wins || 0);
 
       const podiumColors = ['#f5c518', '#c0c0c0', '#cd7f32'];
       const trailColor = rank < 3 ? podiumColors[rank] : COLORS[p.name].hex;

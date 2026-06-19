@@ -198,7 +198,7 @@
         </div>
         <div class="wins-row">
           <span class="wins-label">🏆 Sejre</span>
-          <span class="wins-rings">${'⭕'.repeat(p.wins || 0)}</span>
+          <span class="wins-rings" style="color:#f5c518">${'★'.repeat(p.wins || 0)}</span>
           <span class="wins-count">${p.wins || 0}/6</span>
           <button class="win-btn rem" onclick="win('${p.name}', -1)">−</button>
           <button class="win-btn add" onclick="win('${p.name}', 1)">+ Sejr</button>
