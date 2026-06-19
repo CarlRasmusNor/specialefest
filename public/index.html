@@ -380,7 +380,7 @@
     if (drinkLogs.length === 0) {
       logList.innerHTML = '<div style="color:#333; text-align:center; padding:20px; font-size:0.8rem;">Ingen endnu</div>';
     } else {
-      const DRINK_EMOJI = { øl: '🍺', vin: '🍷', drik: '🥤' };
+      const DRINK_EMOJI = { øl: '🍺', vin: '🍷', drink: '🥤', drik: '🥤' };
       logList.innerHTML = drinkLogs.map(l => {
         const c = COLORS[l.name]?.hex || '#fff';
         const emoji = DRINK_EMOJI[l.drinkType] || '🍺';
