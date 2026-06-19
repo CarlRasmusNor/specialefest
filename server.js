@@ -19,7 +19,7 @@ function loadState() {
 
 function initState() {
   const state = {
-    participants: PARTICIPANTS.map(name => ({ name, points: 0, drinks: 0 })),
+    participants: PARTICIPANTS.map(name => ({ name, points: 0, drinks: 0, wins: 0 })),
     log: []
   };
   saveState(state);
@@ -53,6 +53,16 @@ app.post('/api/points', (req, res) => {
   p.points = Math.max(0, p.points + Number(points));
   state.log.unshift({ name, type: 'points', amount: Number(points), time: new Date().toISOString() });
   state.log = state.log.slice(0, 50);
+  saveState(state);
+  res.json({ success: true, participant: p });
+});
+
+app.post('/api/wins', (req, res) => {
+  const { name, delta } = req.body;
+  const state = loadState();
+  const p = state.participants.find(p => p.name === name);
+  if (!p) return res.status(404).json({ error: 'Deltager ikke fundet' });
+  p.wins = Math.min(6, Math.max(0, (p.wins || 0) + Number(delta)));
   saveState(state);
   res.json({ success: true, participant: p });
 });

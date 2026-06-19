@@ -78,6 +78,44 @@
     .pt-btn.neg:active, .pt-btn.neg:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
     .pt-btn.neg { border-color: #3a1515; color: #e74c3c; }
 
+    .wins-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .wins-label { color: #888; font-size: 0.85rem; flex: 1; }
+
+    .wins-count {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f5c518;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .wins-rings { letter-spacing: -2px; font-size: 0.85rem; }
+
+    .win-btn {
+      padding: 6px 14px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .win-btn.add:hover, .win-btn.add:active { background: #f5c518; color: #000; border-color: #f5c518; }
+    .win-btn.rem:hover, .win-btn.rem:active { background: #555; color: #fff; border-color: #555; }
+    .win-btn:active { transform: scale(0.93); }
+
     .reset-section {
       margin-top: 32px;
       text-align: center;
@@ -158,8 +196,25 @@
           <button class="pt-btn pos" onclick="give('${p.name}', 5)">+5</button>
           <button class="pt-btn pos" onclick="give('${p.name}', 10)">+10</button>
         </div>
+        <div class="wins-row">
+          <span class="wins-label">🏆 Sejre</span>
+          <span class="wins-rings">${'⭕'.repeat(p.wins || 0)}</span>
+          <span class="wins-count">${p.wins || 0}/6</span>
+          <button class="win-btn rem" onclick="win('${p.name}', -1)">−</button>
+          <button class="win-btn add" onclick="win('${p.name}', 1)">+ Sejr</button>
+        </div>
       </div>
     `).join('');
+  }
+
+  async function win(name, delta) {
+    await fetch('/api/wins', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, delta })
+    });
+    await poll();
+    toast(delta > 0 ? `${name}: +1 sejr 🏆` : `${name}: sejr fjernet`);
   }
 
   async function give(name, points) {
