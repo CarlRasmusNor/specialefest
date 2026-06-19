@@ -183,6 +183,28 @@
       text-shadow: 0 1px 4px rgba(0,0,0,0.9);
     }
 
+    .trail {
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 3px;
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(90deg, transparent 0%, currentColor 100%);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 4;
+      border-radius: 0 2px 2px 0;
+    }
+
+    .trail.leader {
+      height: 4px;
+      opacity: 1;
+      background: linear-gradient(90deg, transparent 0%, #f5c518 100%);
+      box-shadow: 0 0 10px #f5c518, 0 0 22px rgba(245,197,24,0.35);
+    }
+
     /* DRINK LOG */
     .drink-log {
       width: 170px;
@@ -309,6 +331,7 @@
       lane.innerHTML = `
         <div class="rank-col" id="rank-${name}">1</div>
         <div class="track">
+          <div class="trail" id="trail-${name}" style="color: ${c.hex}"></div>
           <div class="car" id="car-${name}" style="color: ${c.hex}">
             <div class="car-points" id="pts-${name}">0 pt</div>
             <div class="car-avatar" style="border-color:${c.hex}; box-shadow:0 0 14px ${c.hex}88">
@@ -337,6 +360,10 @@
 
       const pct = 2 + (p.points / maxPts) * 83;
       document.getElementById('car-' + p.name).style.left = pct + '%';
+
+      const trail = document.getElementById('trail-' + p.name);
+      trail.style.width = p.points > 0 ? pct + '%' : '0%';
+      trail.classList.toggle('leader', rank === 0 && p.points > 0);
     });
 
     // Log
