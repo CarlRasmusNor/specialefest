@@ -57,6 +57,36 @@
       overflow: hidden;
     }
 
+    /* CHALLENGES BAR */
+    .challenges-bar {
+      display: flex;
+      gap: 10px;
+      padding: 8px 16px;
+      background: #0a0a0a;
+      border-bottom: 1px solid #1a1a1a;
+      flex-shrink: 0;
+    }
+
+    .challenge-chip {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #888;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .challenge-chip .ch-emoji { font-size: 1.1rem; }
+    .challenge-chip .ch-name { }
+
     /* TRACK AREA */
     .track-area {
       flex: 1;
@@ -376,6 +406,13 @@
     <div class="cel-name" id="cel-name"></div>
     <div class="cel-score" id="cel-score"></div>
   </div>
+</div>
+
+<div class="challenges-bar">
+  <div class="challenge-chip"><span class="ch-emoji">📱</span><span class="ch-name">Kahoot</span></div>
+  <div class="challenge-chip"><span class="ch-emoji">🍺</span><span class="ch-name">Flip the Cup</span></div>
+  <div class="challenge-chip"><span class="ch-emoji">🏓</span><span class="ch-name">Beerpong</span></div>
+  <div class="challenge-chip"><span class="ch-emoji">🎵</span><span class="ch-name">Gæt en Sang</span></div>
 </div>
 
 <main>
