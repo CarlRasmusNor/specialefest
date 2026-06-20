@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 const DATA_FILE = path.join(__dirname, 'data', 'state.json');
-const PARTICIPANTS = ['Victor', 'Sune', 'Reber', 'Asger', 'Emilie', 'Carl', 'Johan', 'Mads'];
+const PARTICIPANTS = ['Victor', 'Sune', 'Reber', 'Asger', 'Emilie', 'Carl', 'Johan', 'Mads', 'Oliver'];
 
 function loadState() {
   try {
